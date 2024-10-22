@@ -44,3 +44,6 @@ body{
 .restart:active{
     background-color: rgb(232, 215, 186);
 }
+.winner{
+    height: 100px;
+}

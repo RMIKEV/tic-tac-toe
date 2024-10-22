@@ -11,7 +11,9 @@ function GameBoard() {
     let play = (r, c, marker) => {
         if (board[r][c] == 0) {
             board[r][c] = marker;
+            return true;
         }
+        else false;
     }
 
     let getBoard = () => board;
@@ -32,6 +34,7 @@ function GameControl(p1 = 'Rmikev', p2 = "Kira") {
         }
     ];
     let currentPlayer = player[0];
+    let count =0;
     let activePlayer = () => currentPlayer;
     let changePlayer = () => {
         currentPlayer = (currentPlayer === player[0]) ? player[1] : player[0];
@@ -44,30 +47,39 @@ function GameControl(p1 = 'Rmikev', p2 = "Kira") {
                 board[i][j] = 0;
         }
         currentPlayer = player[0];
+        count=0;
 
     };
-
+   
     let winner = (r, c) => {
         let board = game.getBoard();
-
+        ++count;
+        console.log(count);
         if (board[r][0] != 0 && (board[r][0] === board[r][1] && board[r][1] === board[r][2]))
-            return currentPlayer.name;
-
+            return `${currentPlayer.marker} WINS`;
         else if (board[0][c] != 0 && (board[0][c] === board[1][c] && board[1][c] === board[2][c]))
-            return currentPlayer.name;
-
+            return `${currentPlayer.marker} WINS`;
         else if (board[0][0] != 0 && (board[0][0] === board[1][1] && board[1][1] === board[2][2]))
-            return currentPlayer.name;
-
+            return `${currentPlayer.marker} WINS`;
         else if (board[0][2] != 0 && (board[0][2] === board[1][1] && board[1][1] === board[2][0]))
-            return currentPlayer.name;
-
-        return false;
+            return `${currentPlayer.marker} WINS`;
+        else if(count == 9)
+            return "Draw";
+        else
+            return false;
     }
 
     let playRound = (r, c) => {
-        game.play(r, c, currentPlayer.marker);
-        changePlayer();
+        let next =game.play(r, c, currentPlayer.marker);
+        if(next){
+            let check =winner(r,c);
+            if(check){
+                restart();
+                return check;
+            }
+            changePlayer();
+        }
+       
 
     }
 
@@ -80,8 +92,9 @@ function ScreenControl() {
     let game = GameControl();
 
     let boardDiv = document.querySelector(".board");
+    let winnerDiv = document.querySelector(".winner");
 
-    let update = () => {
+    let update = (row, col) => {
         boardDiv.textContent = " ";
 
         let playerDiv = document.querySelector(".player");
@@ -89,7 +102,7 @@ function ScreenControl() {
 
         let board = game.getBoard();
 
-        playerDiv.textContent = `${currentPlayer.name}'s Turn`;
+        playerDiv.textContent = `${currentPlayer.marker}'s Turn`;
 
         for (let i = 0; i < 3; ++i) {
             for (let j = 0; j < 3; ++j) {
@@ -112,8 +125,13 @@ function ScreenControl() {
         let row = e.target.dataset.row;
         let col = e.target.dataset.col;
 
-        game.playRound(row, col);
+        let ans = game.playRound(row, col);
         update();
+        if(ans){
+            winnerDiv.textContent=`${ans}`;
+            boardDiv.disabled = true;
+        }
+            
 
     }
 
@@ -123,6 +141,7 @@ function ScreenControl() {
     restartBtn.addEventListener("click", () => {
         game.restart();
         update();
+        winnerDiv.textContent=``;
     });
 
     update();
